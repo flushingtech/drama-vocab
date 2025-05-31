@@ -11,6 +11,8 @@ from collections import Counter
 
 video_id = 'TllxLP8sP_w'
 
+nltk.download('punkt_tab')
+nltk.download('stopwords')
 nltk.download('brown')
 nltk.download('wordnet')
 
@@ -20,7 +22,7 @@ fetched_transcript = ytt_api.fetch(video_id)
 transcript = ''
 
 for snippet in fetched_transcript:
-    transcript += f' {snippet.text}'
+    transcript += f' {str(snippet.text)}'
 
 transcript = transcript.strip()
 
@@ -54,6 +56,12 @@ trigram_freq = Counter(trigrams)
 common_bigrams = [bg for bg, freq in bigram_freq.items() if freq > 1]
 common_trigrams = [tg for tg, freq in trigram_freq.items() if freq > 1]
 
+print('Vocabulary candidates: Individual words')
+print(vocab_candidates, '\n')
+print('Vocabulary candidates: Bigrams')
+print(common_bigrams, '\n')
+print('Vocabulary candidates: Trigrams')
+print(common_trigrams, '\n')
 
 # word_frequency = {}
 
@@ -67,4 +75,3 @@ common_trigrams = [tg for tg, freq in trigram_freq.items() if freq > 1]
 #             else:
 #                 word_frequency[word] = 1
 
-pprint.pprint(word_frequency)
