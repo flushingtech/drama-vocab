@@ -13,6 +13,14 @@ from collections import Counter
 video_id = 'TllxLP8sP_w'
 
 
+
+def get_definitions(word):
+    synsets = wordnet.synsets(word)
+    if not synsets:
+        return None
+    return [(s.definition(), s.pos()) for s in synsets[:1]]  # Top definition
+
+
 # Load English model
 # If this doesn't work, run in terminal: python -m spacy download en_core_web_sm
 nlp = spacy.load("en_core_web_sm")
@@ -80,6 +88,13 @@ print('Vocabulary candidates: Bigrams')
 print(common_bigrams, '\n')
 print('Vocabulary candidates: Trigrams')
 print(common_trigrams, '\n')
+
+print(f'\n\nDefinitions for individual words:')
+vocab_candidates = list(set(vocab_candidates))
+for vocab_candidate in vocab_candidates:
+    definition = get_definitions(vocab_candidate)
+    if definition:
+        print(vocab_candidate, definition)
 
 # word_frequency = {}
 
