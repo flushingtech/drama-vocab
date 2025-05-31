@@ -1,15 +1,21 @@
 from youtube_transcript_api import YouTubeTranscriptApi
-import pprint
+import spacy
 import nltk  # Natural Language Toolkit
 
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords, brown, wordnet
 from nltk.util import ngrams
-import string
 
+import pprint
+import string
 from collections import Counter
 
 video_id = 'TllxLP8sP_w'
+
+
+# Load English model
+# If this doesn't work, run in terminal: python -m spacy download en_core_web_sm
+nlp = spacy.load("en_core_web_sm")
 
 nltk.download('punkt_tab')
 nltk.download('stopwords')
@@ -26,10 +32,22 @@ for snippet in fetched_transcript:
 
 transcript = transcript.strip()
 
+doc = nlp(transcript)
+
+# Filter out named entities (e.g., PERSON, ORG, GPE)
+filtered_tokens = [token.text.lower() for token in doc 
+                   if not token.ent_type_ and token.is_alpha and not token.is_stop]
+
+filler_words = {"wow", "okay", "yeah", "uh", "um", "uh-huh", "oh", "hmm"}
+filtered_tokens_without_fillers = [
+    word for word in filtered_tokens if word not in filler_words]
+
+filtered_transcript = ' '.join(filtered_tokens_without_fillers)
 
 # Sentence and word tokenization
-sentences = sent_tokenize(transcript)
+sentences = sent_tokenize(filtered_transcript)
 tokens = [word_tokenize(sent.lower()) for sent in sentences]
+
 
 # Remove punctuation and stopwords
 stop_words = set(stopwords.words('english') + list(string.punctuation))
@@ -39,7 +57,7 @@ flat_tokens = [word for sent in cleaned_tokens for word in sent]
 
 # Build a frequency distribution from a reference corpus
 brown_freq = nltk.FreqDist(w.lower() for w in brown.words())
-common_words = set([word for word, freq in brown_freq.most_common(5000)])
+common_words = set([word for word, freq in brown_freq.most_common(10000)])
 
 # Uncommon words = words not in common word list
 vocab_candidates = [word for word in flat_tokens if word not in common_words]
